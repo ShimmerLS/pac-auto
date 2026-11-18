@@ -11,7 +11,7 @@ import os
 import time
 
 up_time = time.ctime()
-headline = ['[SwitchyOmega Conditions]\n',
+headline = ['[AutoProxy 0.2.9]\n',
             '; Require: https://github.com/zero-peak/ZeroOmega\n',
             '; Update @ {}\n'.format(up_time),
             '\n',
