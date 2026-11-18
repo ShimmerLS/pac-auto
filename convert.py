@@ -2,7 +2,7 @@
 '''
 @作者: 风沐白
 @文件: convert.py
-@描述: 从网络来源更新白名单规则（已去IP，通配符前加||）
+@描述: 从网络来源更新白名单规则（已去IP，已去 *. 通配符，统一使用 || 规范）
 '''
 
 import requests
@@ -16,37 +16,43 @@ headline = ['[AutoProxy 0.2.9]\n',
             '; Update @ {}\n'.format(up_time),
             '\n',
             '! cn域名都不走代理\n',
-            '||*.cn\n',
-            '||*.wang\n',
+            '||cn\n',
+            '||wang\n',
             '\n',
             '! 教育网\n',
-            '||*.acm.org\n',
-            '||*.dblp.org\n',
-            '||*.ebscohost.com\n',
-            '||*.edu\n',
-            '||*.edu.*\n',
-            '||*.engineeringvillage.com\n',
-            '||*.ieee.org\n',
-            '||*.jstor.org\n',
-            '||*.lexis.com\n',
-            '||*.msftconnecttest.com\n',
-            '||*.nature.com\n',
-            '||*.oclc.org\n',
-            '||*.proquest.com\n',
-            '||*.researchgate.net\n',
-            '||*.sciencedirect.com\n',
-            '||*.sciencemag.org\n',
-            '||*.springer.com\n',
-            '||*.tandfonline.com\n',
-            '||*.uni-trier.de\n',
-            '||*.webofknowledge.com\n',
-            '||*.wiley.com\n',
+            '||acm.org\n',
+            '||dblp.org\n',
+            '||ebscohost.com\n',
+            '||edu\n',
+            '||engineeringvillage.com\n',
+            '||ieee.org\n',
+            '||jstor.org\n',
+            '||lexis.com\n',
+            '||msftconnecttest.com\n',
+            '||nature.com\n',
+            '||oclc.org\n',
+            '||proquest.com\n',
+            '||researchgate.net\n',
+            '||sciencedirect.com\n',
+            '||sciencemag.org\n',
+            '||springer.com\n',
+            '||tandfonline.com\n',
+            '||uni-trier.de\n',
+            '||webofknowledge.com\n',
+            '||wiley.com\n',
             '\n',
             '! 常规列表\n']
 
+def clean_rule(rule):
+    # 清理掉可能存在的 *. 前缀
+    rule = rule.strip()
+    if rule.startswith('*.'):
+        rule = rule[2:]
+    elif rule.startswith('*'):
+        rule = rule.lstrip('*').lstrip('.')
+    return '||' + rule if rule else ''
+
 def main():
-    # 来源 https://github.com/felixonmars/dnsmasq-china-list
-    # 本地运行可能需要代理
     conf_url = 'https://raw.githubusercontent.com/felixonmars/dnsmasq-china-list/master/accelerated-domains.china.conf'
     conf_file = 'accelerated-domains.china.conf'
     sorl_file = 'white-list.txt'
@@ -58,13 +64,14 @@ def main():
 
     with open(conf_file, 'r') as f:
         for line in f.readlines():
-            if line[0] == '#':
+            if not line or line[0] == '#':
                 continue
-            rule = re.sub(r'server=/(\S+)/\d+\.\d+\.\d+\.\d+', r'*.\1', line)
-            if re.match(r'^\*\.\w+$', rule):
+            rule = re.sub(r'server=/(\S+)/\d+\.\d+\.\d+\.\d+', r'\1', line)
+            if re.match(r'^\w+$', rule):
                 continue
-            # 在规则前面添加 ||
-            rules.add('||' + rule)
+            formatted = clean_rule(rule)
+            if formatted:
+                rules.add(formatted)
 
     rules = list(rules)
     rules.sort()
@@ -93,20 +100,21 @@ def mini():
 
     with open(conf_file, 'r') as f:
         for line in f.readlines():
-            if line[0] == '#':
+            line = line.strip()
+            if not line or line.startswith('#'):
                 continue
             if 'DOMAIN-SUFFIX' in line:
-                rule = re.sub(r'^DOMAIN-SUFFIX,(\S+)$', r'*.\1', line)
+                rule = re.sub(r'^DOMAIN-SUFFIX,(\S+)$', r'\1', line)
             elif 'DOMAIN-KEYWORD' in line:
-                rule = re.sub(r'^DOMAIN-KEYWORD,(\S+)$', r'*.\1.*', line)
+                rule = re.sub(r'^DOMAIN-KEYWORD,(\S+)$', r'\1', line)
             elif 'DOMAIN' in line:
                 rule = re.sub(r'^DOMAIN,(\S+)$', r'\1', line)
             else:
                 continue
-            if re.match(r'^\*\.\w+$', rule):
-                continue
-            # 在规则前面添加 ||
-            rules.append('||' + rule)
+            
+            formatted = clean_rule(rule)
+            if formatted and formatted not in rules:
+                rules.append(formatted)
 
     out = [*headline, *rules]
 
