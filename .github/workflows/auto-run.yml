@@ -1,0 +1,33 @@
+name: Auto Convert Rules
+
+# 触发自动化任务的条件
+on:
+  schedule:
+    # 每天北京时间早上 8:00 自动运行一次 (对应 UTC 时间 0:00)
+    - cron: '0 0 * * *'
+  workflow_dispatch: # 允许你在网页上随时手动点一下运行
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # 赋予权限，让自动化脚本能够把生成的 txt 文件自动保存回仓库
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Run conversion script
+        run: python convert.py
+
+      - name: Commit and push if changed
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add whitelist_rules.txt
+          # 检查文件是否有变动，如果有变动就自动提交并推送到仓库
+          git diff --quiet && git diff --cached --quiet || (git commit -m "Auto-update whitelist rules: $(date +'%Y-%m-%d')" && git push)
