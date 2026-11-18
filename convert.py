@@ -15,11 +15,11 @@ headline = ['[SwitchyOmega Conditions]\n',
             '; Require: https://github.com/zero-peak/ZeroOmega\n',
             '; Update @ {}\n'.format(up_time),
             '\n',
-            '; cn域名都不走代理\n',
+            '! cn域名都不走代理\n',
             '||*.cn\n',
             '||*.wang\n',
             '\n',
-            '; 教育网\n',
+            '! 教育网\n',
             '||*.acm.org\n',
             '||*.dblp.org\n',
             '||*.ebscohost.com\n',
@@ -42,14 +42,14 @@ headline = ['[SwitchyOmega Conditions]\n',
             '||*.webofknowledge.com\n',
             '||*.wiley.com\n',
             '\n',
-            '; 常规列表\n']
+            '! 常规列表\n']
 
 def main():
     # 来源 https://github.com/felixonmars/dnsmasq-china-list
     # 本地运行可能需要代理
     conf_url = 'https://raw.githubusercontent.com/felixonmars/dnsmasq-china-list/master/accelerated-domains.china.conf'
     conf_file = 'accelerated-domains.china.conf'
-    sorl_file = 'white-list.sorl'
+    sorl_file = 'white-list.txt'
     rules = set()
 
     r = requests.get(conf_url)
@@ -79,7 +79,7 @@ def main():
 def mini():
     conf_url = 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/ChinaDomain.list'
     conf_file = 'ChinaDomain.list'
-    sorl_file = 'white-mini.sorl'
+    sorl_file = 'white-mini.txt'
     rules = []
 
     r = requests.get(conf_url)
