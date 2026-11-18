@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 '''
 @作者: 风沐白
-@文件: update.py
+@文件: convert.py
 @描述: 从网络来源更新白名单规则（已去IP，通配符前加||）
 '''
 
