@@ -14,7 +14,9 @@ try:
         # 跳过空行和注释
         if not line or line.startswith((";", "[", "#", "!")):
             continue
-        rules.append(line)
+        
+        # 保留原有的通配符 "*."，直接在最前面加上 "||"
+        rules.append("||" + line)
 
     with open(output_file, "w", encoding="utf-8") as f:
         f.write("\n".join(rules))
