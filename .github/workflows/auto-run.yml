@@ -2,8 +2,8 @@ name: Auto Convert Rules
 
 on:
   schedule:
-    - cron: '0 0 * * *'
-  workflow_dispatch:
+    - cron: '0 0 * * *' # 每天北京时间早上 8:00 自动运行
+  workflow_dispatch: # 允许手动触发
 
 jobs:
   run-script:
@@ -19,16 +19,18 @@ jobs:
         with:
           python-version: '3.10'
 
-      # 👉 在这里新增一步：安装 requests 库
+      # 1. 安装 requests 依赖
       - name: Install dependencies
         run: pip install requests
 
+      # 2. 运行你写好的转换脚本
       - name: Run conversion script
-        run: python convert.py  # 注意：如果你把脚本命名为了 update.py，这里就要写 update.py
+        run: python convert.py
 
+      # 3. 自动提交生成的 .txt 文件到仓库
       - name: Commit and push if changed
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add white-list.sorl white-mini.sorl
+          git add white-list.txt white-mini.txt
           git diff --quiet && git diff --cached --quiet || (git commit -m "Auto-update rules: $(date +'%Y-%m-%d')" && git push)
