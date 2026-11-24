@@ -1,6 +1,6 @@
 [AutoProxy 0.2.9]
 ; Require: https://github.com/zero-peak/ZeroOmega
-; Update @ Mon Nov 23 07:18:27 2026
+; Update @ Tue Nov 24 09:41:13 2026
 
 ! cn域名都不走代理
 ||cn
